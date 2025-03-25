@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	purl "github.com/package-url/packageurl-go"
-	"golang.org/x/mod/semver"
 )
 
 type Coordinate struct {
@@ -123,6 +122,14 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return nil, fmt.Errorf("failed to parse purl into a package with error: %w", err)
 	}
 	switch pkg.Type {
+	case "bitnami":
+		return &Coordinate{
+			CoordinateType: pkg.Type,
+			Provider:       "bitnami",
+			Namespace:      emptyToHyphen(pkg.Namespace),
+			Name:           pkg.Name,
+			Revision:       pkg.Version,
+		}, nil
 	case "cocoapods":
 		return &Coordinate{
 			CoordinateType: "pod",
@@ -239,7 +246,31 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 			Provider:       pkg.Type,
 			Namespace:      emptyToHyphen(strings.ReplaceAll(pkg.Namespace, "/", "%2f")),
 			Name:           pkg.Name,
-			Revision:       ensureSemverPrefixGolang(pkg.Version),
+			Revision:       "v" + pkg.Version,
+		}, nil
+	case "hackage":
+		return &Coordinate{
+			CoordinateType: "haskell",
+			Provider:       "hackage",
+			Namespace:      "-",
+			Name:           pkg.Name,
+			Revision:       pkg.Version,
+		}, nil
+	case "huggingface":
+		return &Coordinate{
+			CoordinateType: pkg.Type,
+			Provider:       "huggingfacehub",
+			Namespace:      pkg.Namespace,
+			Name:           pkg.Name,
+			Revision:       pkg.Version,
+		}, nil
+	case "luarocks":
+		return &Coordinate{
+			CoordinateType: "lua",
+			Provider:       "luarocks",
+			Namespace:      emptyToHyphen(pkg.Namespace),
+			Name:           pkg.Name,
+			Revision:       pkg.Version,
 		}, nil
 	case "maven":
 		// maven is a unique case where it can have 3 Providers
@@ -277,6 +308,14 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
 		}, nil
+	case "pub":
+		return &Coordinate{
+			CoordinateType: pkg.Type,
+			Provider:       "pubdev",
+			Namespace:      emptyToHyphen(pkg.Namespace),
+			Name:           pkg.Name,
+			Revision:       pkg.Version,
+		}, nil
 	case "pypi":
 		// purl: PyPI treats - and _ as the same character
 		// and is not case sensitive. Therefore a PyPI
@@ -285,6 +324,14 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "pypi",
+			Namespace:      emptyToHyphen(pkg.Namespace),
+			Name:           pkg.Name,
+			Revision:       pkg.Version,
+		}, nil
+	case "qpkg":
+		return &Coordinate{
+			CoordinateType: "qnx",
+			Provider:       "qnx",
 			Namespace:      emptyToHyphen(pkg.Namespace),
 			Name:           pkg.Name,
 			Revision:       pkg.Version,
@@ -307,19 +354,4 @@ func emptyToHyphen(namespace string) string {
 	} else {
 		return namespace
 	}
-}
-
-// ensureSemverPrefixGolang checks if the version string is valid SemVer and ensures it starts with "v" for golang version
-func ensureSemverPrefixGolang(version string) string {
-	if semver.IsValid(version) {
-		return version
-	}
-
-	vPrefixed := "v" + version
-	if semver.IsValid(vPrefixed) {
-		return vPrefixed
-	}
-
-	// If not a valid SemVer, return as-is
-	return version
 }

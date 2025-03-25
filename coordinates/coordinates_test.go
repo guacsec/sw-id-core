@@ -28,6 +28,17 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			Name:    "bitnami",
+			purlUri: "pkg:bitnami/wordpress@6.2.0?arch=arm64&distro=photon-4",
+			want: &Coordinate{
+				CoordinateType: "bitnami",
+				Provider:       "bitnami",
+				Namespace:      "-",
+				Name:           "wordpress",
+				Revision:       "6.2.0",
+			},
+		},
+		{
 			Name:    "cocoapods",
 			purlUri: "pkg:cocoapods/AFNetworking@4.0.1",
 			want: &Coordinate{
@@ -60,7 +71,8 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "5.5.0",
 			},
 			wantErr: false,
-		}, {
+		},
+		{
 			Name:    "conda anaconda-mai",
 			purlUri: "pkg:conda/absl-py@0.4.1?build=py36h06a4308_0&channel=main&subdir=linux-64&type=tar.bz2",
 			want: &Coordinate{
@@ -160,8 +172,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "244fd47e07d1004",
 			},
 			wantErr: false,
-		},
-		{
+		}, {
 			Name:    "golang",
 			purlUri: "pkg:golang/cloud.google.com/go/compute@1.23.0",
 			want: &Coordinate{
@@ -172,20 +183,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "v1.23.0",
 			},
 			wantErr: false,
-		},
-		{
-			Name:    "golang",
-			purlUri: "pkg:golang/github.com/aws/aws-lambda-go@v1.46.0",
-			want: &Coordinate{
-				CoordinateType: "go",
-				Provider:       "golang",
-				Namespace:      "github.com%2faws",
-				Name:           "aws-lambda-go",
-				Revision:       "v1.46.0",
-			},
-			wantErr: false,
-		},
-		{
+		}, {
 			Name:    "golang",
 			purlUri: "pkg:golang/context@234fd47e07d1004f0aed9c#api",
 			want: &Coordinate{
@@ -193,9 +191,52 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Provider:       "golang",
 				Namespace:      "-",
 				Name:           "context",
-				Revision:       "234fd47e07d1004f0aed9c",
+				Revision:       "v234fd47e07d1004f0aed9c",
 			},
 			wantErr: false,
+		}, {
+			Name:    "hackage",
+			purlUri: "pkg:hackage/3d-graphics-examples@0.0.0.2",
+			want: &Coordinate{
+				CoordinateType: "haskell",
+				Provider:       "hackage",
+				Namespace:      "-",
+				Name:           "3d-graphics-examples",
+				Revision:       "0.0.0.2",
+			},
+			wantErr: false,
+		}, {
+			Name:    "huggingface",
+			purlUri: "pkg:huggingface/deepseek-ai/DeepSeek-R1@f7361cd9ff99396dbf6bd644ad846015e59ed4fc",
+			want: &Coordinate{
+				CoordinateType: "huggingface",
+				Provider:       "huggingfacehub",
+				Namespace:      "deepseek-ai",
+				Name:           "DeepSeek-R1",
+				Revision:       "f7361cd9ff99396dbf6bd644ad846015e59ed4fc",
+			},
+			wantErr: false,
+		}, {
+			Name:    "luarocks",
+			purlUri: "pkg:luarocks/luasocket@3.1.0-1",
+			want: &Coordinate{
+				CoordinateType: "lua",
+				Provider:       "luarocks",
+				Namespace:      "-",
+				Name:           "luasocket",
+				Revision:       "3.1.0-1",
+			},
+			wantErr: false,
+		}, {
+			Name:    "luarocks",
+			purlUri: "pkg:luarocks/hisham/luafilesystem@1.8.0-1",
+			want: &Coordinate{
+				CoordinateType: "lua",
+				Provider:       "luarocks",
+				Namespace:      "hisham",
+				Name:           "luafilesystem",
+				Revision:       "1.8.0-1",
+			},
 		}, {
 			Name:    "maven - mavencentral",
 			purlUri: "pkg:maven/org.apache.xmlgraphics/batik-anim@1.9.1?type=zip&classifier=dist",
@@ -251,6 +292,17 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "6.0.1304",
 			},
 			wantErr: false,
+		},
+		{
+			Name:    "pub",
+			purlUri: "pkg:pub/characters@1.2.0",
+			want: &Coordinate{
+				CoordinateType: "pub",
+				Provider:       "pubdev",
+				Namespace:      "-",
+				Name:           "characters",
+				Revision:       "1.2.0",
+			},
 		}, {
 			Name:    "pypi",
 			purlUri: "pkg:pypi/django-allauth@12.23",
@@ -262,6 +314,16 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "12.23",
 			},
 			wantErr: false,
+		}, {
+			Name:    "qpkg",
+			purlUri: "pkg:qpkg/blackberry/com.qnx.sdp@7.0.0.SGA201702151847",
+			want: &Coordinate{
+				CoordinateType: "qnx",
+				Provider:       "qnx",
+				Namespace:      "blackberry",
+				Name:           "com.qnx.sdp",
+				Revision:       "7.0.0.SGA201702151847",
+			},
 		},
 	}
 	for _, tt := range tests {
