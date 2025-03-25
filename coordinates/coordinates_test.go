@@ -37,8 +37,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Name:           "wordpress",
 				Revision:       "6.2.0",
 			},
-		},
-		{
+		}, {
 			Name:    "cocoapods",
 			purlUri: "pkg:cocoapods/AFNetworking@4.0.1",
 			want: &Coordinate{
@@ -71,8 +70,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "5.5.0",
 			},
 			wantErr: false,
-		},
-		{
+		}, {
 			Name:    "conda anaconda-mai",
 			purlUri: "pkg:conda/absl-py@0.4.1?build=py36h06a4308_0&channel=main&subdir=linux-64&type=tar.bz2",
 			want: &Coordinate{
@@ -160,8 +158,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "244fd47e07d1004",
 			},
 			wantErr: false,
-		},
-		{
+		}, {
 			Name:    "github",
 			purlUri: "pkg:github/purl-spec@244fd47e07d1004#everybody/loves/dogs",
 			want: &Coordinate{
@@ -185,13 +182,24 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 			wantErr: false,
 		}, {
 			Name:    "golang",
+			purlUri: "pkg:golang/github.com/aws/aws-lambda-go@v1.46.0",
+			want: &Coordinate{
+				CoordinateType: "go",
+				Provider:       "golang",
+				Namespace:      "github.com%2faws",
+				Name:           "aws-lambda-go",
+				Revision:       "v1.46.0",
+			},
+			wantErr: false,
+		}, {
+			Name:    "golang",
 			purlUri: "pkg:golang/context@234fd47e07d1004f0aed9c#api",
 			want: &Coordinate{
 				CoordinateType: "go",
 				Provider:       "golang",
 				Namespace:      "-",
 				Name:           "context",
-				Revision:       "v234fd47e07d1004f0aed9c",
+				Revision:       "234fd47e07d1004f0aed9c",
 			},
 			wantErr: false,
 		}, {
@@ -292,8 +300,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "6.0.1304",
 			},
 			wantErr: false,
-		},
-		{
+		}, {
 			Name:    "pub",
 			purlUri: "pkg:pub/characters@1.2.0",
 			want: &Coordinate{
