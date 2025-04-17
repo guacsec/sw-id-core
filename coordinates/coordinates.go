@@ -17,6 +17,7 @@ package coordinates
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	purl "github.com/package-url/packageurl-go"
@@ -294,11 +295,16 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 }
 
 func (c *Coordinate) ToString() string {
-	if c.Revision == "" {
-		return fmt.Sprintf("%s/%s/%s/%s/%22%22", c.CoordinateType, c.Provider, c.Namespace, c.Name)
-	} else {
-		return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, c.Namespace, c.Name, c.Revision)
+	rev := c.Revision
+	if rev == "" {
+		rev = `""`
 	}
+
+	// The namespace, name, and revision come path unescaped from net/url. We will need to
+	// re-escape them before sending them on to the ClearlyDefined API.
+
+	return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, url.PathEscape(c.Namespace),
+		url.PathEscape(c.Name), url.PathEscape(rev))
 }
 
 func emptyToHyphen(namespace string) string {

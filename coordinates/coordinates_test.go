@@ -277,3 +277,51 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 		})
 	}
 }
+
+func TestCoordinateToString(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		coordinate *Coordinate
+		want       string
+	}{
+		{
+			name: "django-all-auth, version 12.23",
+			coordinate: &Coordinate{
+				CoordinateType: "pypi",
+				Provider:       "pypi",
+				Namespace:      "-",
+				Name:           "django-allauth",
+				Revision:       "12.23",
+			},
+			want: "pypi/pypi/-/django-allauth/12.23",
+		},
+		{
+			name: "django-all-auth, no version",
+			coordinate: &Coordinate{
+				CoordinateType: "pypi",
+				Provider:       "pypi",
+				Namespace:      "-",
+				Name:           "django-allauth",
+				Revision:       "",
+			},
+			want: "pypi/pypi/-/django-allauth/%22%22",
+		},
+		{
+			name: "url escape namespace, name, revision",
+			coordinate: &Coordinate{
+				CoordinateType: "pypi",
+				Provider:       "pypi",
+				Namespace:      "-%",
+				Name:           "django-allauth,",
+				Revision:       "12.23?",
+			},
+			want: "pypi/pypi/-%25/django-allauth%2C/12.23%3F",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.coordinate.ToString(); got != tt.want {
+				t.Errorf("coordinate.ToString() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
