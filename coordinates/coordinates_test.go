@@ -262,6 +262,17 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 				Revision:       "12.23",
 			},
 			wantErr: false,
+		}, {
+			Name:    "pypi with no version",
+			purlUri: "pkg:pypi/django-allauth",
+			want: &Coordinate{
+				CoordinateType: "pypi",
+				Provider:       "pypi",
+				Namespace:      "-",
+				Name:           "django-allauth",
+				Revision:       "%22%22",
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {

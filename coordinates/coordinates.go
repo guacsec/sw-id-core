@@ -129,6 +129,9 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 	ns := emptyToHyphen(url.PathEscape(pkg.Namespace))
 	name := url.PathEscape(pkg.Name)
 	rev := url.PathEscape(pkg.Version)
+	if rev == "" {
+		rev = "%22%22"
+	}
 
 	switch pkg.Type {
 	case "cocoapods":
@@ -302,12 +305,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 }
 
 func (c *Coordinate) ToString() string {
-	rev := c.Revision
-	if rev == "" {
-		rev = `""`
-	}
-
-	return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, c.Namespace, c.Name, rev)
+	return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, c.Namespace, c.Name, c.Revision)
 }
 
 func emptyToHyphen(namespace string) string {
