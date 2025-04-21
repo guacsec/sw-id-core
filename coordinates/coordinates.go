@@ -123,30 +123,37 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse purl into a package with error: %w", err)
 	}
+
+	// The namespace, name, and revision come path unescaped from net/url. We will need to
+	// re-escape them before sending them on to the ClearlyDefined API.
+	ns := emptyToHyphen(url.PathEscape(pkg.Namespace))
+	name := url.PathEscape(pkg.Name)
+	rev := url.PathEscape(pkg.Version)
+
 	switch pkg.Type {
 	case "cocoapods":
 		return &Coordinate{
 			CoordinateType: "pod",
 			Provider:       "cocoapods",
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "cargo":
 		return &Coordinate{
 			CoordinateType: "crate",
 			Provider:       "cratesio",
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "composer":
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "packagist",
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "conda":
 		// channel -> Provider in coordinates (3 Providers: anaconda-main, anaconda-r, conda-forge)
@@ -170,9 +177,9 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		// version-build -> Revision in coordinates
 		var Revision string
 		if build, ok := qualifiers["build"]; ok {
-			Revision = pkg.Version + "-" + build
+			Revision = rev + "-" + build
 		} else {
-			Revision = pkg.Version
+			Revision = rev
 		}
 
 		// subdir is the associated platform
@@ -187,7 +194,7 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 			CoordinateType: pkg.Type,
 			Provider:       Provider,
 			Namespace:      emptyToHyphen(namespace),
-			Name:           pkg.Name,
+			Name:           name,
 			Revision:       Revision,
 		}, nil
 
@@ -200,56 +207,56 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 			if arch == "source" {
 				// source component: arch=source in purl -> debsrc type in coordinates
 				pkgType = "debsrc"
-				Revision = pkg.Version
+				Revision = rev
 			} else {
 				pkgType = "deb"
 				// version_architecture -> Revision in coordinates
-				Revision = pkg.Version + "_" + arch
+				Revision = rev + "_" + arch
 			}
 		} else {
 			pkgType = "deb"
-			Revision = pkg.Version
+			Revision = rev
 		}
 
 		return &Coordinate{
 			CoordinateType: pkgType,
 			Provider:       "debian",
 			Namespace:      "-",
-			Name:           pkg.Name,
+			Name:           name,
 			Revision:       Revision,
 		}, nil
 	case "gem":
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "rubygems",
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "github":
 		return &Coordinate{
 			CoordinateType: "git",
 			Provider:       pkg.Type,
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "golang":
 		return &Coordinate{
 			CoordinateType: "go",
 			Provider:       pkg.Type,
-			Namespace:      emptyToHyphen(strings.ReplaceAll(pkg.Namespace, "/", "%2f")),
-			Name:           pkg.Name,
-			Revision:       ensureSemverPrefixGolang(pkg.Version),
+			Namespace:      ns,
+			Name:           name,
+			Revision:       ensureSemverPrefixGolang(rev),
 		}, nil
 	case "maven":
 		// maven is a unique case where it can have 3 Providers
 		// and there is no real way to know which it is. Trying
 		// the current heuristics
 		var Provider string
-		if strings.Contains(pkg.Namespace, "android") {
+		if strings.Contains(ns, "android") {
 			Provider = "mavengoogle"
-		} else if strings.Contains(pkg.Name, "gradle") {
+		} else if strings.Contains(name, "gradle") {
 			Provider = "gradleplugin"
 		} else {
 			Provider = "mavencentral"
@@ -258,25 +265,25 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: "maven",
 			Provider:       Provider,
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "npm":
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "npmjs",
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "nuget":
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "nuget",
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	case "pypi":
 		// purl: PyPI treats - and _ as the same character
@@ -286,9 +293,9 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 		return &Coordinate{
 			CoordinateType: pkg.Type,
 			Provider:       "pypi",
-			Namespace:      emptyToHyphen(pkg.Namespace),
-			Name:           pkg.Name,
-			Revision:       pkg.Version,
+			Namespace:      ns,
+			Name:           name,
+			Revision:       rev,
 		}, nil
 	}
 	return nil, fmt.Errorf("failed to get coordinates from purl: %s", purlUri)
@@ -300,11 +307,7 @@ func (c *Coordinate) ToString() string {
 		rev = `""`
 	}
 
-	// The namespace, name, and revision come path unescaped from net/url. We will need to
-	// re-escape them before sending them on to the ClearlyDefined API.
-
-	return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, url.PathEscape(c.Namespace),
-		url.PathEscape(c.Name), url.PathEscape(rev))
+	return fmt.Sprintf("%s/%s/%s/%s/%s", c.CoordinateType, c.Provider, c.Namespace, c.Name, rev)
 }
 
 func emptyToHyphen(namespace string) string {

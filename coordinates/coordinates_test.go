@@ -167,7 +167,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 			want: &Coordinate{
 				CoordinateType: "go",
 				Provider:       "golang",
-				Namespace:      "cloud.google.com%2fgo",
+				Namespace:      "cloud.google.com%2Fgo",
 				Name:           "compute",
 				Revision:       "v1.23.0",
 			},
@@ -179,7 +179,7 @@ func TestConvertPurlToCoordinate(t *testing.T) {
 			want: &Coordinate{
 				CoordinateType: "go",
 				Provider:       "golang",
-				Namespace:      "github.com%2faws",
+				Namespace:      "github.com%2Faws",
 				Name:           "aws-lambda-go",
 				Revision:       "v1.46.0",
 			},
@@ -302,12 +302,12 @@ func TestCoordinateToString(t *testing.T) {
 				Provider:       "pypi",
 				Namespace:      "-",
 				Name:           "django-allauth",
-				Revision:       "",
+				Revision:       "%22%22",
 			},
 			want: "pypi/pypi/-/django-allauth/%22%22",
 		},
 		{
-			name: "url escape namespace, name, revision",
+			name: "do not url path escape namespace, name, revision (they are already escaped)",
 			coordinate: &Coordinate{
 				CoordinateType: "pypi",
 				Provider:       "pypi",
@@ -315,7 +315,18 @@ func TestCoordinateToString(t *testing.T) {
 				Name:           "django-allauth,",
 				Revision:       "12.23?",
 			},
-			want: "pypi/pypi/-%25/django-allauth%2C/12.23%3F",
+			want: "pypi/pypi/-%/django-allauth,/12.23?",
+		},
+		{
+			name: "golang github namespaces are unchanged",
+			coordinate: &Coordinate{
+				CoordinateType: "go",
+				Provider:       "golang",
+				Namespace:      "github.com%2Falecthomas",
+				Name:           "repr",
+				Revision:       "0.2.0",
+			},
+			want: "go/golang/github.com%2Falecthomas/repr/0.2.0",
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
