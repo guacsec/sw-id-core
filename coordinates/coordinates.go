@@ -300,6 +300,25 @@ func ConvertPurlToCoordinate(purlUri string) (*Coordinate, error) {
 			Name:           name,
 			Revision:       rev,
 		}, nil
+	case "rpm":
+		qualifiers := pkg.Qualifiers.Map()
+		arch := qualifiers["arch"] 
+	
+		name := pkg.Name
+		rev := pkg.Version
+	
+		revision := rev
+		if arch != "" {
+			revision = rev + "_" + arch
+		}
+	
+		return &Coordinate{
+			CoordinateType: "rpm",
+			Provider:       emptyToHyphen(pkg.Namespace), 
+			Namespace:      "-",
+			Name:           name,
+			Revision:       revision,
+		}, nil	
 	}
 	return nil, fmt.Errorf("failed to get coordinates from purl: %s", purlUri)
 }
