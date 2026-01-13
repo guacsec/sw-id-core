@@ -4,5 +4,5 @@ go 1.24.0
 
 require (
 	github.com/package-url/packageurl-go v0.1.3
-	golang.org/x/mod v0.31.0
+	golang.org/x/mod v0.32.0
 )
